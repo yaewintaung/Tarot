@@ -1,0 +1,37 @@
+﻿@page "/"
+@using Tarot.Models
+
+<PageTitle>Home</PageTitle>
+
+@if(questionAnswer == null){
+    <h1>Loading...</h1>
+}else{
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:px-32 md:px-10 px-8 pt-8 md:pt-10 h-screen w-screen gap-5  bg-[url('/img/card-bg.jpg')] bg-cover bg-center backdrop-brightness-50 bg-no-repeat overflow-auto  [&::-webkit-scrollbar]:hidden ">
+        @foreach(var question in questionAnswer.Questions){
+            <div class="relative flex flex-col my-6 py-4 bg-[url('/img/bg2.jpg')] bg-cover bg-center text-white shadow-sm border border-slate-200 rounded-lg  animate-fadeIn">
+                <div class="flex h-full flex-col items-center justify-between gap-3 p-4">
+                    <h5 class="mb-2 text-xl font-semibold text-amber-50">
+                    @question.QuestionId
+                    </h5>
+                    <p class="font-extrabold">
+                    @question.QuestionName
+                    </p>
+                    <NavLink href=@($"/question/{question.QuestionId}") class="inline w-[40%] rounded-md bg-cyan-950 p-1 text-center text-white">
+                    Read more
+                    </NavLink>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code{
+    public QuestionAnswer? questionAnswer = new QuestionAnswer();
+
+
+    protected override async Task OnInitializedAsync(){
+        questionAnswer = await HttpClient.GetFromJsonAsync<QuestionAnswer>("data/data.json");
+       
+    }
+    
+}

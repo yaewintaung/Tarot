@@ -1,0 +1,90 @@
+﻿@page "/question/{Id:int}"
+@using Tarot.Models
+<PageTitle>Question name</PageTitle>
+
+<div class="w-screen h-screen bg-[url('/img/dt-bg.jpg')] bg-cover bg-center">
+
+
+    <div class="flex h-[100%] w-[100%] flex-col items-center justify-center">
+
+        <div class="animate-fadeIn flex items-end justify-center space-x-[-3rem] hover:space-x-[0]">
+            @if(answers != null && answers.Count > 0)
+            {
+                @for (int i = 0; i < answers.Count; i++)
+                {
+                    var ans = answers[i];
+                    <div 
+                        class=@($"h-30 w-24 md:h-52 md:w-36 {rotations[i]} transform cursor-pointer overflow-hidden rounded-xl shadow-md transition-all hover:-translate-y-5 ")
+                         @onclick="() => SelectAnswer(ans)">
+                        <img src="@answers[i].AnswerImageUrl" alt="Card" class="h-full w-full object-cover" />
+                    </div>
+                }
+            }
+        </div>
+        <h1 class="pt-3 text-center font-bold text-white md:text-xl">ကြိုက်နှစ်သက်ရာ ပုံတစ်ပုံကိုရွေးချယ်ပါ <br /> (မိမိရွေးချယ်သောပထမဆုံးကဒ်သည်သာ မိမိရဲ့ ကံကြမ္မာ)</h1>
+    </div>
+
+    @if (selectedAnswer != null)
+    {
+        <div class="bg-opacity-60 absolute top-0 z-50 flex h-full w-full flex-col overflow-hidden bg-black backdrop-opacity-85">
+            <div class="p-3">
+                <NavLink href="/" class="rounded-md bg-white p-3">Back To Questions</NavLink>
+            </div>
+            <div class="flex h-full flex-col items-center justify-center overflow-hidden p-3">
+                <div class="h-30 w-20 scale-100 transform rounded-xl bg-white shadow-xl transition duration-300 hover:scale-105 md:h-60 md:w-46">
+                    <img src="@selectedAnswer.AnswerImageUrl" alt="@selectedAnswer.AnswerName" class="h-full w-full rounded-xl object-cover" />
+                </div>
+                <p class="mt-3 font-extrabold text-[10px] text-yellow-400 text-shadow-yellow-200 md:mt-3 md:px-32 md:text-xl">@selectedAnswer.AnswerDesp</p>
+            </div>
+        </div>
+    }
+</div>
+
+
+
+@code{
+    [Parameter]
+    public int? Id { get; set; }
+    private string[] rotations = new[] { "-rotate-3", "-rotate-6", "rotate-3", "rotate-6" };
+    int testanswer = 0;
+    public QuestionAnswer? questionAnswer;
+
+    public List<Answer>? answers;
+    private Answer? selectedAnswer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        questionAnswer = await HttpClient.GetFromJsonAsync<QuestionAnswer>("data/data.json");
+
+        answers = questionAnswer!.Answers.FindAll(a => a.QuestionId == Id);
+        ShuffleAnswers(answers);
+    }
+
+    private void SelectAnswer(Answer answer)
+    {
+        if (selectedAnswer == answer)
+        {
+            selectedAnswer = null;
+        }
+        else
+        {
+            selectedAnswer = answer;
+        }
+    }
+
+    private void ShuffleAnswers(List<Answer> answers)
+    {
+        Random rng = new Random();
+        int i = answers.Count;
+        while (i > 1)
+        {
+            i--;
+            int j = rng.Next(i + 1);
+            (answers[j], answers[i]) = (answers[i], answers[j]);
+        }
+
+
+    }
+
+
+}
